@@ -35,6 +35,19 @@ type State = SharedState & {
     exactShares?: Record<string, number>;
     percentShares?: Record<string, number>;
   }) => void;
+  updateExpense: (input: {
+    id: string;
+    groupId: string;
+    description: string;
+    amount: number;
+    currency: Currency;
+    paidBy: string;
+    splitType: SplitType;
+    participantIds: string[];
+    exactShares?: Record<string, number>;
+    percentShares?: Record<string, number>;
+    date: string;
+  }) => void;
   deleteExpense: (expenseId: string) => void;
   recordSettlement: (input: {
     groupId: string;
@@ -153,6 +166,34 @@ export const useStore = create<State>()(
             date: new Date().toISOString(),
           };
           dispatch({ type: "addExpense", expense });
+        },
+
+        updateExpense: ({
+          id,
+          groupId,
+          description,
+          amount,
+          currency,
+          paidBy,
+          splitType,
+          participantIds,
+          exactShares,
+          percentShares,
+          date,
+        }) => {
+          const shares = computeShares(splitType, amount, participantIds, exactShares, percentShares);
+          const expense: Expense = {
+            id,
+            groupId,
+            description: description.trim() || "Expense",
+            amount,
+            currency,
+            paidBy,
+            splitType,
+            shares,
+            date,
+          };
+          dispatch({ type: "updateExpense", expense });
         },
 
         deleteExpense: (expenseId) => dispatch({ type: "deleteExpense", expenseId }),

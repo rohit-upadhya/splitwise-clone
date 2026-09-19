@@ -84,6 +84,8 @@ async function persistAction(action: Action): Promise<void> {
       await put(pathFor.group(action.group.id), JSON.stringify(action.group), putOpts);
       break;
     case "addExpense":
+    case "updateExpense":
+      // Same key — an update simply overwrites the entity's blob.
       await put(pathFor.expense(action.expense.id), JSON.stringify(action.expense), putOpts);
       break;
     case "recordSettlement":

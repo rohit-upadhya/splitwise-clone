@@ -3,24 +3,51 @@
 import { useMemo, useState } from "react";
 import { Modal } from "./Modal";
 import { useStore } from "@/lib/store";
-import { CURRENCIES, Currency, Group, SplitType } from "@/lib/types";
+import { CURRENCIES, Currency, Expense, Group, SplitType } from "@/lib/types";
 
-export function AddExpenseModal({ group, onClose }: { group: Group; onClose: () => void }) {
+export function AddExpenseModal({
+  group,
+  expense,
+  onClose,
+}: {
+  group: Group;
+  expense?: Expense;
+  onClose: () => void;
+}) {
   const members = useStore((s) => s.members);
   const addExpense = useStore((s) => s.addExpense);
+  const updateExpense = useStore((s) => s.updateExpense);
+  const isEditing = !!expense;
   const groupMembers = useMemo(
     () => members.filter((m) => group.memberIds.includes(m.id)),
     [members, group.memberIds]
   );
 
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
-  const [currency, setCurrency] = useState<Currency>("USD");
-  const [paidBy, setPaidBy] = useState(groupMembers[0]?.id ?? "");
-  const [splitType, setSplitType] = useState<SplitType>("equal");
-  const [participants, setParticipants] = useState<Set<string>>(new Set(group.memberIds));
-  const [exact, setExact] = useState<Record<string, string>>({});
-  const [percent, setPercent] = useState<Record<string, string>>({});
+  const editParticipantIds = expense ? Object.keys(expense.shares) : null;
+
+  const [description, setDescription] = useState(expense?.description ?? "");
+  const [amount, setAmount] = useState(expense ? String(expense.amount) : "");
+  const [currency, setCurrency] = useState<Currency>(expense?.currency ?? "USD");
+  const [paidBy, setPaidBy] = useState(expense?.paidBy ?? groupMembers[0]?.id ?? "");
+  const [splitType, setSplitType] = useState<SplitType>(expense?.splitType ?? "equal");
+  const [participants, setParticipants] = useState<Set<string>>(
+    new Set(editParticipantIds ?? group.memberIds)
+  );
+  const [exact, setExact] = useState<Record<string, string>>(() =>
+    expense?.splitType === "exact"
+      ? Object.fromEntries(Object.entries(expense.shares).map(([id, v]) => [id, String(v)]))
+      : {}
+  );
+  const [percent, setPercent] = useState<Record<string, string>>(() =>
+    expense?.splitType === "percent" && expense.amount
+      ? Object.fromEntries(
+          Object.entries(expense.shares).map(([id, v]) => [
+            id,
+            String(Math.round((v / expense.amount) * 1000) / 10),
+          ])
+        )
+      : {}
+  );
 
   const numericAmount = parseFloat(amount) || 0;
 
@@ -47,7 +74,7 @@ export function AddExpenseModal({ group, onClose }: { group: Group; onClose: () 
 
   const handleSubmit = () => {
     if (!canSubmit) return;
-    addExpense({
+    const common = {
       groupId: group.id,
       description,
       amount: numericAmount,
@@ -63,12 +90,17 @@ export function AddExpenseModal({ group, onClose }: { group: Group; onClose: () 
         splitType === "percent"
           ? Object.fromEntries(Array.from(participants).map((id) => [id, parseFloat(percent[id]) || 0]))
           : undefined,
-    });
+    };
+    if (isEditing && expense) {
+      updateExpense({ ...common, id: expense.id, date: expense.date });
+    } else {
+      addExpense(common);
+    }
     onClose();
   };
 
   return (
-    <Modal title="Add an expense" onClose={onClose}>
+    <Modal title={isEditing ? "Edit expense" : "Add an expense"} onClose={onClose}>
       <div className="space-y-4">
         <div>
           <label className="mb-1 block text-sm font-medium">Description</label>
@@ -186,7 +218,7 @@ export function AddExpenseModal({ group, onClose }: { group: Group; onClose: () 
           disabled={!canSubmit}
           className="w-full rounded-md bg-emerald-600 px-3 py-2 font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Add expense
+          {isEditing ? "Save changes" : "Add expense"}
         </button>
       </div>
     </Modal>

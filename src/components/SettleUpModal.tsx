@@ -10,12 +10,14 @@ export function SettleUpModal({
   defaultFrom,
   defaultTo,
   defaultAmount,
+  defaultCurrency,
   onClose,
 }: {
   group: Group;
   defaultFrom?: string;
   defaultTo?: string;
   defaultAmount?: number;
+  defaultCurrency?: Currency;
   onClose: () => void;
 }) {
   const members = useStore((s) => s.members);
@@ -25,7 +27,7 @@ export function SettleUpModal({
   const [from, setFrom] = useState(defaultFrom ?? groupMembers[0]?.id ?? "");
   const [to, setTo] = useState(defaultTo ?? groupMembers[1]?.id ?? "");
   const [amount, setAmount] = useState(defaultAmount ? String(defaultAmount) : "");
-  const [currency, setCurrency] = useState<Currency>("USD");
+  const [currency, setCurrency] = useState<Currency>(defaultCurrency ?? "USD");
 
   const numericAmount = parseFloat(amount) || 0;
   const canSubmit = from && to && from !== to && numericAmount > 0;

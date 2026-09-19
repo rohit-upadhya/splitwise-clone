@@ -13,6 +13,7 @@ export type Action =
   | { type: "createGroup"; group: Group }
   | { type: "addMembersToGroup"; groupId: string; memberIds: string[] }
   | { type: "addExpense"; expense: Expense }
+  | { type: "updateExpense"; expense: Expense }
   | { type: "deleteExpense"; expenseId: string }
   | { type: "recordSettlement"; settlement: Settlement };
 
@@ -41,6 +42,11 @@ export function applyAction(state: SharedState, action: Action): SharedState {
     case "addExpense":
       if (state.expenses.some((e) => e.id === action.expense.id)) return state;
       return { ...state, expenses: [action.expense, ...state.expenses] };
+    case "updateExpense":
+      return {
+        ...state,
+        expenses: state.expenses.map((e) => (e.id === action.expense.id ? action.expense : e)),
+      };
     case "deleteExpense":
       return { ...state, expenses: state.expenses.filter((e) => e.id !== action.expenseId) };
     case "recordSettlement":

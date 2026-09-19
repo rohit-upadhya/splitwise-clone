@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getState, writeState } from "@/lib/db";
-import { Action, applyAction } from "@/lib/reducer";
+import { applyAndRead, getState } from "@/lib/db";
+import { Action } from "@/lib/reducer";
 
 export const dynamic = "force-dynamic";
 
@@ -17,9 +17,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  // Read-modify-write against the shared document (seeds on first access).
-  const current = await getState();
-  const next = applyAction(current, action);
-  await writeState(next);
+  // Each action persists to its own key — no shared read-modify-write, no race.
+  const next = await applyAndRead(action);
   return NextResponse.json(next);
 }

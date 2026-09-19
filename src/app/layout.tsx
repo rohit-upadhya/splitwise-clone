@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Splitwise Clone — Split expenses with live currency conversion",
-  description: "Track shared expenses and settle up with live EUR, USD, INR & AED conversion.",
+  description: "Track shared expenses and settle up with live EUR, USD, INR & BHD conversion.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

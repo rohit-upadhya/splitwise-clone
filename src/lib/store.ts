@@ -42,6 +42,7 @@ type State = {
   }) => void;
   setDisplayCurrency: (c: Currency) => void;
   setCurrentUser: (memberId: string) => void;
+  seedDemo: () => void;
 };
 
 export const useStore = create<State>()(
@@ -142,6 +143,76 @@ export const useStore = create<State>()(
 
       setDisplayCurrency: (c) => set({ displayCurrency: c }),
       setCurrentUser: (memberId) => set({ currentUserId: memberId }),
+
+      // Pre-loads the "EU Trip" group between You and Puberun from the real data.
+      // Only runs on a fresh/empty store so it never clobbers your own edits.
+      seedDemo: () => {
+        if (get().groups.length > 0 || get().members.length > 0) return;
+        const me = "me";
+        const pub = "puberun";
+        set({
+          members: [
+            { id: me, name: "You" },
+            { id: pub, name: "Puberun" },
+          ],
+          currentUserId: me,
+          groups: [
+            {
+              id: "eu-trip",
+              name: "EU Trip",
+              memberIds: [me, pub],
+              createdAt: "2026-09-18T00:00:00.000Z",
+            },
+          ],
+          expenses: [
+            {
+              id: "exp-energy",
+              groupId: "eu-trip",
+              description: "Energy bar",
+              amount: 428,
+              currency: "INR",
+              paidBy: me,
+              splitType: "equal",
+              shares: { [me]: 214, [pub]: 214 },
+              date: "2026-09-18T10:00:00.000Z",
+            },
+            {
+              id: "exp-allianz",
+              groupId: "eu-trip",
+              description: "Allianz",
+              amount: 50,
+              currency: "EUR",
+              paidBy: pub,
+              splitType: "equal",
+              shares: { [me]: 25, [pub]: 25 },
+              date: "2026-09-18T09:00:00.000Z",
+            },
+            {
+              id: "exp-food",
+              groupId: "eu-trip",
+              description: "Food airport",
+              amount: 5.8,
+              currency: "BHD",
+              paidBy: me,
+              splitType: "exact",
+              shares: { [me]: 1.9, [pub]: 3.9 },
+              date: "2026-09-18T08:00:00.000Z",
+            },
+            {
+              id: "exp-nevk",
+              groupId: "eu-trip",
+              description: "Nevk pillow",
+              amount: 2385,
+              currency: "INR",
+              paidBy: me,
+              splitType: "equal",
+              shares: { [me]: 1192.5, [pub]: 1192.5 },
+              date: "2026-09-18T07:00:00.000Z",
+            },
+          ],
+          settlements: [],
+        });
+      },
     }),
     { name: "splitwise-clone-store" }
   )

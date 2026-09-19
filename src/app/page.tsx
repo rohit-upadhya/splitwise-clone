@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useStore } from "@/lib/store";
 import { CurrencyTicker } from "@/components/CurrencyTicker";
 import { NewGroupModal } from "@/components/NewGroupModal";
@@ -9,8 +9,14 @@ import { GroupView } from "@/components/GroupView";
 export default function Home() {
   const groups = useStore((s) => s.groups);
   const members = useStore((s) => s.members);
+  const seedDemo = useStore((s) => s.seedDemo);
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
   const [showNewGroup, setShowNewGroup] = useState(false);
+
+  // Seed the EU Trip data on first load (no-op once you have your own groups).
+  useEffect(() => {
+    seedDemo();
+  }, [seedDemo]);
 
   const activeGroup = groups.find((g) => g.id === activeGroupId) ?? groups[0] ?? null;
 
@@ -70,7 +76,7 @@ export default function Home() {
                 <p className="mb-2 text-lg font-medium">Welcome 👋</p>
                 <p className="max-w-sm text-sm">
                   Create a group, add friends, and start splitting expenses — with live EUR, USD,
-                  INR &amp; AED conversion.
+                  INR &amp; BHD conversion.
                 </p>
               </div>
             )}

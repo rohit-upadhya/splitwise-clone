@@ -1,10 +1,10 @@
-export type Currency = "USD" | "EUR" | "INR" | "AED";
+export type Currency = "USD" | "EUR" | "INR" | "BHD";
 
 export const CURRENCIES: { code: Currency; label: string; symbol: string; flag: string }[] = [
   { code: "USD", label: "US Dollar", symbol: "$", flag: "🇺🇸" },
   { code: "EUR", label: "Euro", symbol: "€", flag: "🇪🇺" },
   { code: "INR", label: "Indian Rupee", symbol: "₹", flag: "🇮🇳" },
-  { code: "AED", label: "UAE Dirham", symbol: "د.إ", flag: "🇦🇪" },
+  { code: "BHD", label: "Bahraini Dinar", symbol: "BHD ", flag: "🇧🇭" },
 ];
 
 export type Member = {

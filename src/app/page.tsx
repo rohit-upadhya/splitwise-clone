@@ -9,14 +9,18 @@ import { GroupView } from "@/components/GroupView";
 export default function Home() {
   const groups = useStore((s) => s.groups);
   const members = useStore((s) => s.members);
-  const seedDemo = useStore((s) => s.seedDemo);
+  const loaded = useStore((s) => s.loaded);
+  const load = useStore((s) => s.load);
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
   const [showNewGroup, setShowNewGroup] = useState(false);
 
-  // Seed the EU Trip data on first load (no-op once you have your own groups).
+  // Load shared data from the server and keep it fresh so changes made on
+  // another device (e.g. Puberun's phone) show up automatically.
   useEffect(() => {
-    seedDemo();
-  }, [seedDemo]);
+    load();
+    const interval = setInterval(load, 8000);
+    return () => clearInterval(interval);
+  }, [load]);
 
   const activeGroup = groups.find((g) => g.id === activeGroupId) ?? groups[0] ?? null;
 
@@ -69,7 +73,11 @@ export default function Home() {
           </aside>
 
           <section>
-            {activeGroup ? (
+            {!loaded ? (
+              <div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-neutral-300 text-sm text-neutral-400 dark:border-neutral-700">
+                Loading…
+              </div>
+            ) : activeGroup ? (
               <GroupView group={activeGroup} />
             ) : (
               <div className="flex h-64 flex-col items-center justify-center rounded-xl border border-dashed border-neutral-300 text-center text-neutral-400 dark:border-neutral-700">
@@ -85,7 +93,7 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-neutral-200 px-4 py-3 text-center text-xs text-neutral-400 dark:border-neutral-800">
-        Data is stored locally in your browser. Exchange rates via exchangerate-api.com.
+        Shared live across devices via Vercel Blob. Exchange rates via exchangerate-api.com.
       </footer>
 
       {showNewGroup && <NewGroupModal onClose={() => setShowNewGroup(false)} />}

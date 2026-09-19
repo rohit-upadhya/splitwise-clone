@@ -15,8 +15,18 @@ function fmt(amount: number, currency: Currency) {
 
 export function GroupView({ group }: { group: Group }) {
   const members = useStore((s) => s.members);
-  const expenses = useStore((s) => s.expenses.filter((e) => e.groupId === group.id));
-  const settlements = useStore((s) => s.settlements.filter((s) => s.groupId === group.id));
+  // Select the raw arrays (stable refs) and filter in useMemo — returning a new
+  // array straight from the selector triggers an infinite loop under zustand v5.
+  const allExpenses = useStore((s) => s.expenses);
+  const allSettlements = useStore((s) => s.settlements);
+  const expenses = useMemo(
+    () => allExpenses.filter((e) => e.groupId === group.id),
+    [allExpenses, group.id]
+  );
+  const settlements = useMemo(
+    () => allSettlements.filter((s) => s.groupId === group.id),
+    [allSettlements, group.id]
+  );
   const displayCurrency = useStore((s) => s.displayCurrency);
   const setDisplayCurrency = useStore((s) => s.setDisplayCurrency);
   const deleteExpense = useStore((s) => s.deleteExpense);
